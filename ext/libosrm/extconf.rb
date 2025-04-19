@@ -17,6 +17,9 @@ end
 
 message "Building ruby-libosrm using system libraries.\n"
 
+$INCFLAGS << " -I/usr/local/include/osrm"
+$LDFLAGS  << " -L/usr/local/lib"
+
 abort "Unable to find necessary libraries" unless
     have_library("boost_system") &&
     have_library("boost_filesystem") &&
@@ -24,8 +27,6 @@ abort "Unable to find necessary libraries" unless
     have_library("boost_thread") &&
     have_library("osrm")
 
-append_cflags("-DHAVE_CXX11")
-append_cflags("-I/usr/local/include/osrm")
-append_cflags("-I/usr/include/boost")
+$CXXFLAGS << " -std=c++17"
 
 create_makefile "libosrm/ruby_libosrm"

@@ -14,8 +14,8 @@ Gem::Specification.new do |s|
 
     This gem requires native dependencies, you can find list of dependencies in README.
   EOF
-  s.authors     = [ "Samu Voutilainen", "Mika Haulo" ]
-  s.email       = "smar@smar.fi"
+  s.authors     = [ "Mika Haulo", "Samu Voutilainen" ]
+  s.email       = "mika@hey.com"
   s.files       = [
     "lib/libosrm.rb",
     "lib/libosrm/osrm.rb",
@@ -25,12 +25,12 @@ Gem::Specification.new do |s|
     Dir.glob("ext/libosrm/*.hpp")
   s.extensions  = %w[ext/libosrm/extconf.rb]
   s.bindir      = "bin"
-  s.homepage    = "https://github.com/Smarre/ruby-libosrm"
+  s.homepage    = "https://github.com/jalkifi/ruby-libosrm"
   s.license     = "MIT"
 
   s.required_ruby_version = "> 2.3.0"
 
-  s.add_runtime_dependency      "rice",           "~> 2.1"
-  s.add_development_dependency  "rake",           "~> 12.0"
-  s.add_development_dependency  "rake-compiler",  "~> 1.0"
+  s.add_runtime_dependency      "rice",           "~> 4"
+  s.add_development_dependency  "rake",           "~> 13"
+  s.add_development_dependency  "rake-compiler",  "~> 1.3"
 end

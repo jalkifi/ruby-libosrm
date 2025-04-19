@@ -3,10 +3,7 @@
 
 #include <osrm/osrm.hpp>
 #include <osrm/json_container.hpp>
-#include "rice/Data_Type.hpp"
-#include "rice/Constructor.hpp"
-#include "rice/Enum.hpp"
-#include "rice/Struct.hpp"
+#include "rice/rice.hpp"
 
 using namespace Rice;
 using namespace osrm;

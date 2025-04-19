@@ -43,13 +43,13 @@ Object OsrmWrap::route(Array coordinates, Hash options) {
     if (!options.is_nil()) {
         Object alternatives_option = options[Symbol("alternatives")];
         if (!alternatives_option.is_nil()) {
-            bool alternatives = from_ruby<bool>(alternatives_option);
+            bool alternatives = detail::From_Ruby<bool>().convert(alternatives_option);
             params.alternatives = alternatives;
         }
 
         Object continue_straight_option = options[Symbol("continue_straight")];
         if (!continue_straight_option.is_nil()) {
-            bool continue_straight = from_ruby<bool>(continue_straight_option);
+            bool continue_straight = detail::From_Ruby<bool>().convert(continue_straight_option);
             params.alternatives = continue_straight;
         }
 
@@ -86,7 +86,7 @@ Object OsrmWrap::match(Array coordinates, Hash options) {
 
         Object tidy_option = options[Symbol("tidy")];
         if (!tidy_option.is_nil()) {
-            bool tidy = from_ruby<bool>(tidy_option);
+            bool tidy = detail::From_Ruby<bool>().convert(tidy_option);
             params.tidy = tidy;
         }
 
@@ -111,10 +111,10 @@ Object OsrmWrap::nearest(double lat, double lon, Hash options) {
     params.number_of_results = 1;
 
     if (!options.is_nil()) {
-        Object number = options[Symbol("number")];
+        Object number = Rice::Object(options[Symbol("number")]);
 
         if (!number.is_nil()) {
-            int number_of_results = from_ruby<int>(options[Symbol("number")]);
+            int number_of_results = detail::From_Ruby<int>().convert(number);
             params.number_of_results = number_of_results;
         }
     }
@@ -149,7 +149,7 @@ Object OsrmWrap::table(Array coordinates, Hash options) {
 
         Object fallback_speed_setting = options[Symbol("fallback_speed")];
         if (!fallback_speed_setting.is_nil()) {
-            double fallback_speed = from_ruby<double>(fallback_speed_setting);
+            double fallback_speed = detail::From_Ruby<double>().convert(fallback_speed_setting);
 
             if (fallback_speed >= 0) {
                 params.fallback_speed = fallback_speed;
@@ -172,7 +172,7 @@ Object OsrmWrap::table(Array coordinates, Hash options) {
         // scale_factor. However, can't find it in code (OSRM backend v. 5.20).
         /*Object scale_factor_setting = options[Symbol("scale_factor")];
         if (!scale_factor_setting.is_nil()) {
-            double scale_factor = from_ruby<double>(scale_factor_setting);
+            double scale_factor = detail::From_Ruby<double>().convert(scale_factor_setting);
 
             if (scale_factor >= 0) {
                 params.scale_factor = scale_factor;
@@ -197,7 +197,7 @@ Object OsrmWrap::trip(Array coordinates, Hash options) {
     if (!options.is_nil()) {
         Object roundtrip_options = options[Symbol("roundtrip")];
         if (!roundtrip_options.is_nil()) {
-            bool roundtrip = from_ruby<bool>(roundtrip_options);
+            bool roundtrip = detail::From_Ruby<bool>().convert(roundtrip_options);
             params.roundtrip = roundtrip;
         }
 
@@ -246,25 +246,25 @@ Object OsrmWrap::trip(Array coordinates, Hash options) {
 Hash OsrmWrap::parseObject(osrm::json::Object input) {
     Hash output;
 
-    for(std::pair<std::string, osrm::json::Value> e : input.values) {
-        int type_index = e.second.which();
+    for(auto const& e : input.values) {
+        int type_index = e.second.index();
 
         switch (type_index) {
             case 0: {
-                output[String(e.first)] = e.second.get<osrm::json::String>().value;
+                output[String(e.first)] = std::get<osrm::json::String>(e.second).value;
                 break;
             }
             case 1: {
-                output[String(e.first)] = e.second.get<osrm::json::Number>().value;
+                output[String(e.first)] = std::get<osrm::json::Number>(e.second).value;
                 break;
             }
             case 2: {
-                auto value = e.second.get<osrm::json::Object>();
+                auto value = std::get<osrm::json::Object>(e.second);
                 output[String(e.first)] = parseObject(value);
                 break;
             }
             case 3: {
-                auto array = e.second.get<osrm::json::Array>();
+                auto array = std::get<osrm::json::Array>(e.second);
                 output[String(e.first)] = parseArray(array);
                 break;
             }
@@ -292,24 +292,24 @@ Array OsrmWrap::parseArray(osrm::json::Array input) {
     Array output;
 
     for(auto const& array_item : input.values) {
-        int type_index = array_item.which();
+        int type_index = array_item.index();
 
         switch (type_index) {
             case 0: {
-                output.push(array_item.get<osrm::json::String>().value);
+                output.push(std::get<osrm::json::String>(array_item).value);
                 break;
             }
             case 1: {
-                output.push(array_item.get<osrm::json::Number>().value);
+                output.push(std::get<osrm::json::Number>(array_item).value);
                 break;
             }
             case 2: {
-                auto value = array_item.get<osrm::json::Object>();
+                auto value = std::get<osrm::json::Object>(array_item);
                 output.push(parseObject(value));
                 break;
             }
             case 3: {
-                auto array = array_item.get<osrm::json::Array>();
+                auto array = std::get<osrm::json::Array>(array_item);
                 output.push(parseArray(array));
                 break;
             }
@@ -344,9 +344,9 @@ std::vector<std::size_t> OsrmWrap::table_array_conversion(Object o) {
             out.push_back(index);
         }
     } else if(o.is_a(rb_cString)) {
-        out.push_back(from_ruby<int>(o));
+        out.push_back(detail::From_Ruby<int>().convert(o));
     } else if(o.is_a(rb_cNumeric)) {
-        out.push_back(from_ruby<int>(o));
+        out.push_back(detail::From_Ruby<int>().convert(o));
     }
 
     return out;
@@ -360,8 +360,11 @@ void OsrmWrap::setCoordinates(Array &coordinates, T &params) {
     for(; it != end; ++it) {
         Hash latlon = (Hash)*it;
 
-        double lat = from_ruby<double>(latlon[Symbol("lat")]);
-        double lon = from_ruby<double>(latlon[Symbol("lon")]);
+        Object lat_obj = Rice::Object(latlon[Symbol("lat")]);
+        Object lon_obj = Rice::Object(latlon[Symbol("lon")]);
+
+        double lat = detail::From_Ruby<double>().convert(lat_obj);
+        double lon = detail::From_Ruby<double>().convert(lon_obj);
 
         params.coordinates.push_back({
             util::FloatLongitude{lon}, util::FloatLatitude{lat}

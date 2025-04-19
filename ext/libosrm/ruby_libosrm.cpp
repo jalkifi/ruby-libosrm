@@ -1,7 +1,4 @@
-#include "rice/Data_Type.hpp"
-#include "rice/Constructor.hpp"
-#include "rice/Enum.hpp"
-#include "rice/Struct.hpp"
+#include "rice/rice.hpp"
 #include "osrm_wrap.hpp"
 
 using namespace Rice;
@@ -14,18 +11,14 @@ using namespace osrm;
 
 extern "C"
 void Init_ruby_libosrm() {
-    RUBY_TRY
-    {
-        Data_Type<OsrmWrap> rb_cLibOSRM =
-            define_class<OsrmWrap>("OSRM")
-                .define_constructor(Constructor<OsrmWrap, const std::string>(),
-            Arg("database"))
-                .define_method("route", &OsrmWrap::route)
-                .define_method("match", &OsrmWrap::match)
-                .define_method("nearest", &OsrmWrap::nearest)
-                .define_method("table", &OsrmWrap::table)
-                .define_method("trip", &OsrmWrap::trip)
-            ;
-    }
-    RUBY_CATCH
+    Data_Type<OsrmWrap> rb_cLibOSRM =
+        define_class<OsrmWrap>("OSRM")
+            .define_constructor(Constructor<OsrmWrap, const std::string>(),
+        Arg("database"))
+            .define_method("route", &OsrmWrap::route)
+            .define_method("match", &OsrmWrap::match)
+            .define_method("nearest", &OsrmWrap::nearest)
+            .define_method("table", &OsrmWrap::table)
+            .define_method("trip", &OsrmWrap::trip)
+        ;
 }
