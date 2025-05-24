@@ -247,41 +247,29 @@ Hash OsrmWrap::parseObject(osrm::json::Object input) {
     Hash output;
 
     for(auto const& e : input.values) {
-        int type_index = e.second.index();
+        const auto& key = String(e.first);
+        const auto& val = e.second;
 
-        switch (type_index) {
-            case 0: {
-                output[String(e.first)] = std::get<osrm::json::String>(e.second).value;
-                break;
-            }
-            case 1: {
-                output[String(e.first)] = std::get<osrm::json::Number>(e.second).value;
-                break;
-            }
-            case 2: {
-                auto value = std::get<osrm::json::Object>(e.second);
-                output[String(e.first)] = parseObject(value);
-                break;
-            }
-            case 3: {
-                auto array = std::get<osrm::json::Array>(e.second);
-                output[String(e.first)] = parseArray(array);
-                break;
-            }
-            case 4: {
-                output[String(e.first)] = true;
-                break;
-            }
-            case 5: {
-                output[String(e.first)] = false;
-                break;
-            }
-            case 6: {
-                output[String(e.first)] = NULL;
-                break;
-            }
-            default:
-                break;
+        if (auto str = std::get_if<osrm::json::String>(&val)) {
+            output[key] = String(str->value.c_str());
+        }
+        else if (auto num = std::get_if<osrm::json::Number>(&val)) {
+            output[key] = num->value;
+        }
+        else if (auto obj = std::get_if<osrm::json::Object>(&val)) {
+            output[key] = parseObject(*obj);
+        }
+        else if (auto arr = std::get_if<osrm::json::Array>(&val)) {
+            output[key] = parseArray(*arr);
+        }
+        else if (auto b = std::get_if<osrm::json::True>(&val)) {
+            output[key] = True;
+        }
+        else if (auto b = std::get_if<osrm::json::False>(&val)) {
+            output[key] = False;
+        }
+        else if (auto n = std::get_if<osrm::json::Null>(&val)) {
+            output[key] = Nil;
         }
     }
 
@@ -292,41 +280,26 @@ Array OsrmWrap::parseArray(osrm::json::Array input) {
     Array output;
 
     for(auto const& array_item : input.values) {
-        int type_index = array_item.index();
-
-        switch (type_index) {
-            case 0: {
-                output.push(std::get<osrm::json::String>(array_item).value);
-                break;
-            }
-            case 1: {
-                output.push(std::get<osrm::json::Number>(array_item).value);
-                break;
-            }
-            case 2: {
-                auto value = std::get<osrm::json::Object>(array_item);
-                output.push(parseObject(value));
-                break;
-            }
-            case 3: {
-                auto array = std::get<osrm::json::Array>(array_item);
-                output.push(parseArray(array));
-                break;
-            }
-            case 4: {
-                output.push(true);
-                break;
-            }
-            case 5: {
-                output.push(false);
-                break;
-            }
-            case 6: {
-                output.push(NULL);
-                break;
-            }
-            default:
-                break;
+        if (auto str = std::get_if<osrm::json::String>(&array_item)) {
+             output.push(String(str->value.c_str()));
+        }
+        else if (auto num = std::get_if<osrm::json::Number>(&array_item)) {
+            output.push(num->value);
+        }
+        else if (auto obj = std::get_if<osrm::json::Object>(&array_item)) {
+            output.push(parseObject(*obj));
+        }
+        else if (auto arr = std::get_if<osrm::json::Array>(&array_item)) {
+            output.push(parseArray(*arr));
+        }
+        else if (auto b = std::get_if<osrm::json::True>(&array_item)) {
+            output.push(True);
+        }
+        else if (auto b = std::get_if<osrm::json::False>(&array_item)) {
+            output.push(False);
+        }
+        else if (auto n = std::get_if<osrm::json::Null>(&array_item)) {
+            output.push(Nil);
         }
     }
 

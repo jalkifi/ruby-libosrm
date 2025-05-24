@@ -5,7 +5,7 @@ class RubyLibOsrmTest < Minitest::Test
     def setup
         # NOTE! In order to make tests run, you need to provide this file by
         # preparing OSM data manually. See README for details.
-        @osrm = OSRM.new "test/osrm-profiles/car/finland-latest.osrm"
+        @osrm = OSRM.new "test/data/car/finland-latest.osrm"
     end
 
     #################
