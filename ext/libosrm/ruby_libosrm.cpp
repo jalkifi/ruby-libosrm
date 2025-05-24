@@ -13,7 +13,7 @@ extern "C"
 void Init_ruby_libosrm() {
     Data_Type<OsrmWrap> rb_cLibOSRM =
         define_class<OsrmWrap>("OSRM")
-            .define_constructor(Constructor<OsrmWrap, const std::string>(),
+            .define_constructor(Constructor<OsrmWrap, Rice::String>(),
         Arg("database"))
             .define_method("route", &OsrmWrap::route)
             .define_method("match", &OsrmWrap::match)

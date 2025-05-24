@@ -19,9 +19,9 @@
 
 // ------------- Standard constructors and destructors ------------------------
 
-OsrmWrap::OsrmWrap(std::string database_path) {
+OsrmWrap::OsrmWrap(Rice::String database_path) {
     EngineConfig config;
-    config.storage_config = {database_path.c_str()};
+    config.storage_config = {database_path.str().c_str()};
     config.use_shared_memory = false;
     config.algorithm = EngineConfig::Algorithm::MLD;
     osrm = new OSRM({config});

@@ -19,7 +19,7 @@ using namespace osrm;
 class OsrmWrap {
 public:
     // Standard constructors and destructors
-    OsrmWrap(std::string database_path);
+    OsrmWrap(Rice::String database_path);
     ~OsrmWrap();
 
     // Main features
